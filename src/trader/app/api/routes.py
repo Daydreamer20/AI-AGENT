@@ -8,6 +8,10 @@ from ..mcp.sequential import SequentialClient
 from ..mcp.playwright_client import PlaywrightMCPClient
 from prometheus_client import CollectorRegistry, CONTENT_TYPE_LATEST, generate_latest
 from fastapi import Response
+from pydantic import BaseModel
+
+class ChatMessage(BaseModel):
+	message: str
 
 router = APIRouter()
 settings = get_settings()
@@ -51,3 +55,18 @@ def metrics() -> Response:
 	# Expose default process metrics. Using default registry implicitly inside generate_latest
 	content = generate_latest()
 	return Response(content=content, media_type=CONTENT_TYPE_LATEST)
+
+
+@router.post("/chat")
+def chat(payload: ChatMessage) -> dict:
+	user_text = payload.message.strip()
+	if not user_text:
+		return {"reply": "Please enter a message."}
+	# Very simple command handling for now
+	if user_text.lower() in {"decision", "signal"}:
+		return {"reply": f"Current decision: {decide()}"}
+	if user_text.lower().startswith("ticker "):
+		# Inform user how to use async ticker endpoint
+		return {"reply": "Use GET /ticker/{exchange}/{symbol} for live data, e.g. /ticker/bybit/BTCUSDT"}
+	# Default echo behavior
+	return {"reply": f"You said: {user_text}"}
