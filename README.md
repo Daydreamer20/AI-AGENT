@@ -32,3 +32,11 @@ make down
 ```
 
 Environment variables are loaded from `.env` (see `.env.example`).
+
+## Chat Interface
+
+- UI: open `http://localhost:8000/ui` in your browser
+- API: `POST /chat` with JSON body `{ "message": "..." }`
+- Tips:
+  - Send `decision` to see the current trading decision
+  - Use exchange endpoints for live tickers: `GET /ticker/{exchange}/{symbol}`
